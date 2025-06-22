@@ -30,10 +30,10 @@ def get_outline(country: str = Query(..., description="Country name to look up")
     if response.status_code != 200:
         return f"# Error\n\nCould not fetch Wikipedia page for '{country}'."
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(res.text, "html.parser")
     headings = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
 
-    markdown = f"## Contents\n\n# {country}\n\n"
+    markdown = f"# {country}\n\n"
     for tag in headings:
         level = int(tag.name[1])
         text = tag.get_text(strip=True)
