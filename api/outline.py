@@ -33,11 +33,12 @@ def get_outline(country: str = Query(..., description="Country name to look up")
     soup = BeautifulSoup(response.text, "html.parser")
     headings = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
 
-    markdown = "## Contents\n\n"
+    markdown = f"## Contents\n\n# {country}\n\n"
     for tag in headings:
-        level = int(tag.name[1])  # h2 → 2
+        level = int(tag.name[1])
         text = tag.get_text(strip=True)
-        if text and not text.startswith("Jump to navigation"):
+        if text and not text.lower().startswith("jump to"):
             markdown += f"{'#' * level} {text}\n\n"
+
 
     return markdown.strip()
