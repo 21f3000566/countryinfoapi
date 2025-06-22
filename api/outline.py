@@ -24,11 +24,17 @@ app.add_middleware(
 )
 
 @app.get("/api/outline", response_class=PlainTextResponse)
-def get_outline(country: str = Query(..., description="Country name to look up")):
+def get_outline(request: Request):
+    country = request.query_params.get("country")
+    if not country:
+        return "# Error\n\nMissing ?country= query parameter."
+
     url = f"https://en.wikipedia.org/wiki/{country.replace(' ', '_')}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return f"# Error\n\nCould not fetch Wikipedia page for '{country}'."
+    try:
+        res = requests.get(url)
+        res.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return f"# Error\n\nFailed to fetch Wikipedia page for '{country}'."
 
     soup = BeautifulSoup(res.text, "html.parser")
     headings = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
@@ -40,5 +46,5 @@ def get_outline(country: str = Query(..., description="Country name to look up")
         if text and not text.lower().startswith("jump to"):
             markdown += f"{'#' * level} {text}\n\n"
 
-
     return markdown.strip()
+
